@@ -1,7 +1,3 @@
-# @summary 
-#   Private class for managing MySQL package.
-#
-# @api private
 #
 class mysql::server::install {
 

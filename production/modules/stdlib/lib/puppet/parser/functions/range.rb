@@ -1,46 +1,43 @@
 #
 # range.rb
 #
+
 # TODO(Krzysztof Wilczynski): We probably need to approach numeric values differently ...
+
 module Puppet::Parser::Functions
-  newfunction(:range, :type => :rvalue, :doc => <<-DOC
-    When given range in the form of (start, stop) it will extrapolate a range as
-    an array.
+  newfunction(:range, :type => :rvalue, :doc => <<-EOS
+When given range in the form of (start, stop) it will extrapolate a range as
+an array.
 
-    *Examples:*
+*Examples:*
 
-        range("0", "9")
+    range("0", "9")
 
-    Will return: [0,1,2,3,4,5,6,7,8,9]
+Will return: [0,1,2,3,4,5,6,7,8,9]
 
-        range("00", "09")
+    range("00", "09")
 
-    Will return: [0,1,2,3,4,5,6,7,8,9] (Zero padded strings are converted to
-    integers automatically)
+Will return: [0,1,2,3,4,5,6,7,8,9] (Zero padded strings are converted to
+integers automatically)
 
-        range("a", "c")
+    range("a", "c")
 
-    Will return: ["a","b","c"]
+Will return: ["a","b","c"]
 
-        range("host01", "host10")
-    Will return: ["host01", "host02", ..., "host09", "host10"]
-    NB Be explicit in including trailing zeros. Otherwise the underlying ruby function will fail.
+    range("host01", "host10")
+Will return: ["host01", "host02", ..., "host09", "host10"]
+NB Be explicit in including trailing zeros. Otherwise the underlying ruby function will fail.
 
-    Passing a third argument will cause the generated range to step by that
-    interval, e.g.
+Passing a third argument will cause the generated range to step by that
+interval, e.g.
 
-        range("0", "9", "2")
+    range("0", "9", "2")
 
-    Will return: [0,2,4,6,8]
+Will return: [0,2,4,6,8]
+    EOS
+  ) do |arguments|
 
-    The Puppet Language support Integer and Float ranges by using the type system. Those are suitable for
-    iterating a given number of times. Also see the step() function in Puppet for skipping values.
-
-        Integer[0, 9].each |$x| { notice($x) } # notices 0, 1, 2, ... 9
-    DOC
-             ) do |arguments|
-
-    raise(Puppet::ParseError, 'range(): Wrong number of arguments given (0 for 1)') if arguments.empty?
+    raise(Puppet::ParseError, 'range(): Wrong number of arguments given (0 for 1)') if arguments.size == 0
 
     if arguments.size > 1
       start = arguments[0]
@@ -52,14 +49,13 @@ module Puppet::Parser::Functions
     else # arguments.size == 1
       value = arguments[0]
 
-      m = value.match(%r{^(\w+)(\.\.\.?|\-)(\w+)$})
-      if m
+      if m = value.match(/^(\w+)(\.\.\.?|\-)(\w+)$/)
         start = m[1]
         stop  = m[3]
 
         type = m[2]
         step = 1
-      elsif value =~ %r{^.+$}
+      elsif value.match(/^.+$/)
         raise(Puppet::ParseError, "range(): Unable to compute range from the value: #{value}")
       else
         raise(Puppet::ParseError, "range(): Unknown range format: #{value}")
@@ -67,7 +63,7 @@ module Puppet::Parser::Functions
     end
 
     # If we were given an integer, ensure we work with one
-    if start.to_s =~ %r{^\d+$}
+    if start.to_s.match(/^\d+$/)
       start = start.to_i
       stop  = stop.to_i
     else
@@ -76,9 +72,9 @@ module Puppet::Parser::Functions
     end
 
     range = case type
-            when %r{^(..|-)$} then (start..stop)
-            when '...' then (start...stop) # Exclusive of last element
-            end
+      when /^(\.\.|\-)$/ then (start .. stop)
+      when '...'         then (start ... stop) # Exclusive of last element
+    end
 
     result = range.step(step).to_a
 

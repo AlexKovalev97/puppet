@@ -1,11 +1,8 @@
-# @summary
-#   "Provider" for Percona XtraBackup
-# @api private
-#
+# See README.me for usage.
 class mysql::backup::xtrabackup (
   $xtrabackup_package_name = $mysql::params::xtrabackup_package_name,
-  $backupuser              = undef,
-  $backuppassword          = undef,
+  $backupuser              = '',
+  $backuppassword          = '',
   $backupdir               = '',
   $maxallowedpacket        = '1M',
   $backupmethod            = 'mysqldump',
@@ -26,15 +23,16 @@ class mysql::backup::xtrabackup (
   $postscript              = false,
   $execpath                = '/usr/bin:/usr/sbin:/bin:/sbin',
   $optional_args           = [],
-  $additional_cron_args    = ''
 ) inherits mysql::params {
 
-  ensure_packages($xtrabackup_package_name)
+  package{ $xtrabackup_package_name:
+    ensure  => $ensure,
+  }
 
   if $backupuser and $backuppassword {
     mysql_user { "${backupuser}@localhost":
       ensure        => $ensure,
-      password_hash => mysql::password($backuppassword),
+      password_hash => mysql_password($backuppassword),
       require       => Class['mysql::server::root_password'],
     }
 
@@ -42,14 +40,14 @@ class mysql::backup::xtrabackup (
       ensure     => $ensure,
       user       => "${backupuser}@localhost",
       table      => '*.*',
-      privileges => [ 'RELOAD', 'PROCESS', 'LOCK TABLES', 'REPLICATION CLIENT' ],
+      privileges => [ 'RELOAD', 'LOCK TABLES', 'REPLICATION CLIENT' ],
       require    => Mysql_user["${backupuser}@localhost"],
     }
   }
 
   cron { 'xtrabackup-weekly':
     ensure  => $ensure,
-    command => "/usr/local/sbin/xtrabackup.sh ${backupdir} ${additional_cron_args}",
+    command => "/usr/local/sbin/xtrabackup.sh ${backupdir}",
     user    => 'root',
     hour    => $time[0],
     minute  => $time[1],
@@ -59,7 +57,7 @@ class mysql::backup::xtrabackup (
 
   cron { 'xtrabackup-daily':
     ensure  => $ensure,
-    command => "/usr/local/sbin/xtrabackup.sh --incremental ${backupdir} ${additional_cron_args}",
+    command => "/usr/local/sbin/xtrabackup.sh --incremental ${backupdir}",
     user    => 'root',
     hour    => $time[0],
     minute  => $time[1],

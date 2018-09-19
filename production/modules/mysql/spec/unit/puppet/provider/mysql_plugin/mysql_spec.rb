@@ -1,24 +1,26 @@
 require 'spec_helper'
 
 describe Puppet::Type.type(:mysql_plugin).provider(:mysql) do
+
   let(:defaults_file) { '--defaults-extra-file=/root/.my.cnf' }
+
+  let(:resource) { Puppet::Type.type(:mysql_plugin).new(
+    { :ensure   => :present,
+      :soname   => 'auth_socket.so',
+      :name     => 'auth_socket',
+      :provider => described_class.name
+    }
+  )}
   let(:provider) { resource.provider }
-  let(:instance) { provider.class.instances.first }
-  let(:resource) do
-    Puppet::Type.type(:mysql_plugin).new(
-      ensure: :present,
-      soname: 'auth_socket.so',
-      name: 'auth_socket',
-      provider: described_class.name,
-    )
-  end
 
   before :each do
     Facter.stubs(:value).with(:root_home).returns('/root')
     Puppet::Util.stubs(:which).with('mysql').returns('/usr/bin/mysql')
     File.stubs(:file?).with('/root/.my.cnf').returns(true)
-    provider.class.stubs(:mysql_caller).with('show plugins', 'regular').returns('auth_socket	ACTIVE	AUTHENTICATION	auth_socket.so	GPL')
+    provider.class.stubs(:mysql).with([defaults_file, '-NBe', 'show plugins']).returns('auth_socket	ACTIVE	AUTHENTICATION	auth_socket.so	GPL')
   end
+
+  let(:instance) { provider.class.instances.first }
 
   describe 'self.prefetch' do
     it 'exists' do
@@ -29,7 +31,7 @@ describe Puppet::Type.type(:mysql_plugin).provider(:mysql) do
 
   describe 'create' do
     it 'loads a plugin' do
-      provider.class.expects(:mysql_caller).with("install plugin #{resource[:name]} soname '#{resource[:soname]}'", 'regular')
+      provider.expects(:mysql).with([defaults_file, '-NBe', "install plugin #{resource[:name]} soname '#{resource[:soname]}'"])
       provider.expects(:exists?).returns(true)
       expect(provider.create).to be_truthy
     end
@@ -37,7 +39,7 @@ describe Puppet::Type.type(:mysql_plugin).provider(:mysql) do
 
   describe 'destroy' do
     it 'unloads a plugin if present' do
-      provider.class.expects(:mysql_caller).with("uninstall plugin #{resource[:name]}", 'regular')
+      provider.expects(:mysql).with([defaults_file, '-NBe', "uninstall plugin #{resource[:name]}"])
       provider.expects(:exists?).returns(false)
       expect(provider.destroy).to be_truthy
     end
@@ -45,7 +47,7 @@ describe Puppet::Type.type(:mysql_plugin).provider(:mysql) do
 
   describe 'exists?' do
     it 'checks if plugin exists' do
-      expect(instance).to be_exists
+      expect(instance.exists?).to be_truthy
     end
   end
 
@@ -65,4 +67,5 @@ describe Puppet::Type.type(:mysql_plugin).provider(:mysql) do
       expect(instance.soname).to eq('auth_socket.so')
     end
   end
+
 end

@@ -29,7 +29,6 @@ describe 'staging::file', type: :define do
         target: '/usr/local/sample.tar.gz'
       }
     end
-
     it { is_expected.to compile.with_all_deps }
     it do
       is_expected.to contain_file('/opt/staging')
@@ -131,7 +130,6 @@ describe 'staging::file', type: :define do
         try_sleep: '6'
       }
     end
-
     it { is_expected.to compile.with_all_deps }
     it do
       is_expected.to contain_file('/opt/staging')
@@ -170,7 +168,6 @@ describe 'staging::file', type: :define do
         password: 'puppet'
       }
     end
-
     it { is_expected.to compile.with_all_deps }
     it do
       is_expected.to contain_file('/opt/staging')
@@ -208,7 +205,6 @@ describe 'staging::file', type: :define do
         password: 'puppet'
       }
     end
-
     it { is_expected.to compile.with_all_deps }
     it do
       is_expected.to contain_file('/opt/staging')

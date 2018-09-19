@@ -1,27 +1,29 @@
+#! /usr/bin/env ruby -S rspec
 require 'spec_helper_acceptance'
 
-describe 'strip function', :if => Puppet::Util::Package.versioncmp(return_puppet_version, '6.0.0') < 0 do
+describe 'strip function' do
   describe 'success' do
-    pp1 = <<-DOC
+    it 'strips arrays' do
+      pp = <<-EOS
       $a = ["  the   ","   public   ","   art","galleries   "]
       # Anagram: Large picture halls, I bet
       $o = strip($a)
       notice(inline_template('strip is <%= @o.inspect %>'))
-    DOC
-    it 'strips arrays' do
-      apply_manifest(pp1, :catch_failures => true) do |r|
-        expect(r.stdout).to match(%r{strip is \["the", "public", "art", "galleries"\]})
+      EOS
+
+      apply_manifest(pp, :catch_failures => true) do |r|
+        expect(r.stdout).to match(/strip is \["the", "public", "art", "galleries"\]/)
       end
     end
-
-    pp2 = <<-DOC
+    it 'strips strings' do
+      pp = <<-EOS
       $a = "   blowzy night-frumps vex'd jack q   "
       $o = strip($a)
       notice(inline_template('strip is <%= @o.inspect %>'))
-    DOC
-    it 'strips strings' do
-      apply_manifest(pp2, :catch_failures => true) do |r|
-        expect(r.stdout).to match(%r{strip is "blowzy night-frumps vex'd jack q"})
+      EOS
+
+      apply_manifest(pp, :catch_failures => true) do |r|
+        expect(r.stdout).to match(/strip is "blowzy night-frumps vex'd jack q"/)
       end
     end
   end

@@ -12,7 +12,7 @@
     * [既存のサーバに対する操作](#既存のサーバに対する操作)
     * [パスワードの指定](#パスワードの指定)
     * [CentOSへのPerconaサーバのインストール](#centosへのperconaサーバのインストール)
-    *[UbuntuへのMariaDBのインストール](#ubuntuへのmariadbのインストール)
+    * [UbuntuへのMariaDBのインストール](#ubuntuへのmariadbのインストール)
 4. [参考 - モジュールの機能と動作について](#参考)
 5. [制約事項 - OSの互換性など](#制約事項)
 6. [開発 - モジュール貢献についてのガイドライン](#開発)
@@ -319,67 +319,6 @@ Apt::Source['mariadb'] ~>
 Class['apt::update'] ->
 Class['::mysql::client']
 ```
-
-### CentOSへのMySQL Communityサーバのインストール
-
-MySQLモジュールおよびHieraを使用して、MySQL CommunityサーバーをCentOSにインストールすることができます。この例は以下のバージョンでテスト済みです。
-
-* MySQL Community Server 5.6
-* Centos 7.3
-* Hieraを使用したPuppet 3.8.7 
-* puppetlabs-mysqlモジュールv3.9.0
-
-Puppetで：
-
-```puppet
-include ::mysql::server
-
-create_resources(yumrepo, hiera('yumrepo', {}))
-
-Yumrepo['repo.mysql.com'] -> Anchor['mysql::server::start']
-Yumrepo['repo.mysql.com'] -> Package['mysql_client']
-
-create_resources(mysql::db, hiera('mysql::server::db', {}))
-```
-
-Hieraで：
-
-```yaml
----
-
-# Centos 7.3
-yumrepo:
-  'repo.mysql.com':
-    baseurl: "http://repo.mysql.com/yum/mysql-5.6-community/el/%{::operatingsystemmajrelease}/$basearch/"
-    descr: 'repo.mysql.com'
-    enabled: 1
-    gpgcheck: true
-    gpgkey: 'http://repo.mysql.com/RPM-GPG-KEY-mysql'
-
-mysql::client::package_name: "mysql-community-client" # 適切なMySQL導入のために必要
-mysql::server::package_name: "mysql-community-server" #適切なMySQL導入のために必要
-mysql::server::package_ensure: 'installed' #ここではバージョンを指定しないでください。残念ながら、パッケージがインストールされているエラーでyumは失敗しました。
-mysql::server::root_password: "change_me_i_am_insecure"
-mysql::server::manage_config_file: true
-mysql::server::service_name: 'mysqld' # Puppetモジュールに必要
-mysql::server::override_options:
-  'mysqld':
-    'bind-address': '127.0.0.1'
-    'log-error': '/var/log/mysqld.log' # 適切なMySQL導入のために必要
-  'mysqld_safe':
-    'log-error': '/var/log/mysqld.log'  # 適切なMySQL導入のために必要 
-
-# データベース+アクセスできるアカウント、暗号化されていないパスワードを作成
-mysql::server::db:
-  "dev":
-    user: "dev"
-    password: "devpass"
-    host: "127.0.0.1"
-    grant:
-      - "ALL"
-
-```
-
 
 ## 参考
 
@@ -1282,10 +1221,6 @@ mysql_plugin { 'auth_socket':
 
 ノードのMACアドレスに基づいて、`server_id`として使用可能な一意なIDを作成します。ループバックインターフェイスしかないノードでは、このファクトは*常に*`0`を返します。これらのノードは外部に接続されていないため、これが衝突の原因になる可能性はありません。
 
-### タスク
-
-MySQLモジュールにはサンプルタスクがあり、ユーザはデータベースに対して任意のSQLを実行できます。[Puppet Enterpriseマニュアル](https://puppet.com/docs/pe/2017.3/orchestrator/running_tasks.html)または[Boltマニュアル](https://puppet.com/docs/bolt/latest/bolt.html)で、タスクを実行する方法に関する情報を参照してください。
-
 ## 制約事項
 
 このモジュールは以下のプラットフォームでテストされています。
@@ -1300,8 +1235,6 @@ MySQLモジュールにはサンプルタスクがあり、ユーザはデータ
 他のプラットフォームでは最小限のテストしか行っていないため、保証はできません。
 
 **注意：** mysqlbackup.shは、MySQL 5.7以降では動作せず、サポートされていません。
-
-Debian 9の互換性は完全には検証されていません。
 
 ## 開発
 
@@ -1326,4 +1259,3 @@ Puppet Forge上のPuppetモジュールはオープンプロジェクトであ�
 * Chris Weyl
 * Daniël van Eeden
 * Jan-Otto Kröpke
-* Timothy Sven Nelson

@@ -1,8 +1,4 @@
-# @summary
-#   Private class for installing daemon development bindings
-#
-# @api private
-#
+# Private class
 class mysql::bindings::daemon_dev {
 
   if $mysql::bindings::daemon_dev_package_name {
@@ -13,7 +9,7 @@ class mysql::bindings::daemon_dev {
       provider        => $mysql::bindings::daemon_dev_package_provider,
     }
   } else {
-    warning(translate('No MySQL daemon development package configured for %{os}.', {'os' => $::operatingsystem }))
+    warning("No MySQL daemon development package configured for ${::operatingsystem}.")
   }
 
 }

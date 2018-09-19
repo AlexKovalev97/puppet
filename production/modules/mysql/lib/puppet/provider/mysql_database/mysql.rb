@@ -1,20 +1,21 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'mysql'))
-Puppet::Type.type(:mysql_database).provide(:mysql, parent: Puppet::Provider::Mysql) do
+Puppet::Type.type(:mysql_database).provide(:mysql, :parent => Puppet::Provider::Mysql) do
   desc 'Manages MySQL databases.'
 
-  commands mysql_raw: 'mysql'
+  commands :mysql => 'mysql'
 
   def self.instances
-    mysql_caller('show databases', 'regular').split("\n").map do |name|
+    mysql([defaults_file, '-NBe', 'show databases'].compact).split("\n").collect do |name|
       attributes = {}
-      mysql_caller(["show variables like '%_database'", name], 'regular').split("\n").each do |line|
-        k, v = line.split(%r{\s})
+      mysql([defaults_file, '-NBe', "show variables like '%_database'", name].compact).split("\n").each do |line|
+        k,v = line.split(/\s/)
         attributes[k] = v
       end
-      new(name: name,
-          ensure: :present,
-          charset: attributes['character_set_database'],
-          collate: attributes['collation_database'])
+      new(:name    => name,
+          :ensure  => :present,
+          :charset => attributes['character_set_database'],
+          :collate => attributes['collation_database']
+         )
     end
   end
 
@@ -23,13 +24,14 @@ Puppet::Type.type(:mysql_database).provide(:mysql, parent: Puppet::Provider::Mys
   def self.prefetch(resources)
     databases = instances
     resources.keys.each do |database|
-      provider = databases.find { |db| db.name == database }
-      resources[database].provider = provider if provider
+      if provider = databases.find { |db| db.name == database }
+        resources[database].provider = provider
+      end
     end
   end
 
   def create
-    self.class.mysql_caller("create database if not exists `#{@resource[:name]}` character set `#{@resource[:charset]}` collate `#{@resource[:collate]}`", 'regular')
+    mysql([defaults_file, '-NBe', "create database if not exists `#{@resource[:name]}` character set `#{@resource[:charset]}` collate `#{@resource[:collate]}`"].compact)
 
     @property_hash[:ensure]  = :present
     @property_hash[:charset] = @resource[:charset]
@@ -39,7 +41,7 @@ Puppet::Type.type(:mysql_database).provide(:mysql, parent: Puppet::Provider::Mys
   end
 
   def destroy
-    self.class.mysql_caller("drop database if exists `#{@resource[:name]}`", 'regular')
+    mysql([defaults_file, '-NBe', "drop database if exists `#{@resource[:name]}`"].compact)
 
     @property_hash.clear
     exists? ? (return false) : (return true)
@@ -52,14 +54,15 @@ Puppet::Type.type(:mysql_database).provide(:mysql, parent: Puppet::Provider::Mys
   mk_resource_methods
 
   def charset=(value)
-    self.class.mysql_caller("alter database `#{resource[:name]}` CHARACTER SET #{value}", 'regular')
+    mysql([defaults_file, '-NBe', "alter database `#{resource[:name]}` CHARACTER SET #{value}"].compact)
     @property_hash[:charset] = value
-    (charset == value) ? (return true) : (return false)
+    charset == value ? (return true) : (return false)
   end
 
   def collate=(value)
-    self.class.mysql_caller("alter database `#{resource[:name]}` COLLATE #{value}", 'regular')
+    mysql([defaults_file, '-NBe', "alter database `#{resource[:name]}` COLLATE #{value}"].compact)
     @property_hash[:collate] = value
-    (collate == value) ? (return true) : (return false)
+    collate == value ? (return true) : (return false)
   end
+
 end

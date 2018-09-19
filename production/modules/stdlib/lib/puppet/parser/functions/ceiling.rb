@@ -1,21 +1,15 @@
-#
-#  ceiling.rb
-#
 module Puppet::Parser::Functions
-  newfunction(:ceiling, :type => :rvalue, :doc => <<-DOC
+  newfunction(:ceiling, :type => :rvalue, :doc => <<-EOS
     Returns the smallest integer greater or equal to the argument.
     Takes a single numeric value as an argument.
-
-    Note: from Puppet 6.0.0, the compatible function with the same name in Puppet core
-    will be used instead of this function.
-    DOC
-             ) do |arguments|
+    EOS
+  ) do |arguments|
 
     raise(Puppet::ParseError, "ceiling(): Wrong number of arguments given (#{arguments.size} for 1)") if arguments.size != 1
 
     begin
       arg = Float(arguments[0])
-    rescue TypeError, ArgumentError => _e
+    rescue TypeError, ArgumentError => e
       raise(Puppet::ParseError, "ceiling(): Wrong argument type given (#{arguments[0]} for Numeric)")
     end
 

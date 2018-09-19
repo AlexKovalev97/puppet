@@ -75,30 +75,10 @@ describe 'staging::extract', type: :define do
         unzip_opts: '-o -f'
       }
     end
-
     it { is_expected.to compile.with_all_deps }
     it do
       is_expected.to contain_file('/opt/staging')
       is_expected.to contain_exec('extract sample.zip').with(command: 'unzip -o -f /opt/staging/sample.zip',
-                                                             path: '/usr/local/bin:/usr/bin:/bin',
-                                                             cwd: '/opt',
-                                                             creates: '/opt/sample')
-    end
-  end
-
-  describe 'when deploying zip with untar_opts' do
-    let(:title) { 'sample.tar' }
-    let(:params) do
-      {
-        target: '/opt',
-        untar_opts: '--exclude=conf/'
-      }
-    end
-
-    it { is_expected.to compile.with_all_deps }
-    it do
-      is_expected.to contain_file('/opt/staging')
-      is_expected.to contain_exec('extract sample.tar').with(command: 'tar xf /opt/staging/sample.tar --exclude=conf/',
                                                              path: '/usr/local/bin:/usr/bin:/bin',
                                                              cwd: '/opt',
                                                              creates: '/opt/sample')
@@ -124,49 +104,9 @@ describe 'staging::extract', type: :define do
     end
   end
 
-  describe 'when deploying zip with 7zip' do
-    let(:title) { 'sample.zip' }
-    let(:params) do
-      {
-        target: '/opt',
-        use_7zip: true
-      }
-    end
-
-    it { is_expected.to compile.with_all_deps }
-    it do
-      is_expected.to contain_file('/opt/staging')
-      is_expected.to contain_exec('extract sample.zip').with(command: '7z x /opt/staging/sample.zip ',
-                                                             path: '/usr/local/bin:/usr/bin:/bin',
-                                                             cwd: '/opt',
-                                                             creates: '/opt/sample')
-    end
-  end
-
-  describe 'when deploying zip with 7zip and unzip_opts' do
-    let(:title) { 'sample.zip' }
-    let(:params) do
-      {
-        target: '/opt',
-        use_7zip: true,
-        unzip_opts: '-r'
-      }
-    end
-
-    it { is_expected.to compile.with_all_deps }
-    it do
-      is_expected.to contain_file('/opt/staging')
-      is_expected.to contain_exec('extract sample.zip').with(command: '7z x /opt/staging/sample.zip -r',
-                                                             path: '/usr/local/bin:/usr/bin:/bin',
-                                                             cwd: '/opt',
-                                                             creates: '/opt/sample')
-    end
-  end
-
   describe 'when deploying war' do
     let(:title) { 'sample.war' }
     let(:params) { { target: '/opt' } }
-
     it { is_expected.to compile.with_all_deps }
     it do
       is_expected.to contain_file('/opt/staging')
@@ -186,7 +126,6 @@ describe 'staging::extract', type: :define do
         unzip_opts: '-o -f'
       }
     end
-
     it { is_expected.to compile.with_all_deps }
     it do
       is_expected.to contain_file('/opt/staging')
@@ -222,7 +161,6 @@ describe 'staging::extract', type: :define do
     let(:params) do
       { target: '/opt' }
     end
-
     it 'fails' do
       is_expected.to compile.and_raise_error(%r{The .deb filetype is only supported on Debian family systems.})
     end

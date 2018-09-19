@@ -1,8 +1,4 @@
-# @summary
-#   Private class for installing python language bindings
-#
-# @api private
-#
+# Private class
 class mysql::bindings::python {
 
   package { 'python-mysqldb':

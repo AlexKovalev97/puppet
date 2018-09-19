@@ -1,6 +1,6 @@
 {
   "name": "puppet-staging",
-  "version": "3.2.0",
+  "version": "2.2.0",
   "author": "Vox Pupuli",
   "summary": "Compressed file staging and deployment",
   "license": "Apache-2.0",
@@ -15,6 +15,7 @@
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [
+        "5",
         "6",
         "7"
       ]
@@ -22,6 +23,7 @@
     {
       "operatingsystem": "CentOS",
       "operatingsystemrelease": [
+        "5",
         "6",
         "7"
       ]
@@ -29,6 +31,7 @@
     {
       "operatingsystem": "OracleLinux",
       "operatingsystemrelease": [
+        "5",
         "6",
         "7"
       ]
@@ -36,6 +39,7 @@
     {
       "operatingsystem": "Scientific",
       "operatingsystemrelease": [
+        "5",
         "6",
         "7"
       ]
@@ -49,6 +53,7 @@
     {
       "operatingsystem": "Debian",
       "operatingsystemrelease": [
+        "6",
         "7",
         "8"
       ]
@@ -56,6 +61,7 @@
     {
       "operatingsystem": "Ubuntu",
       "operatingsystemrelease": [
+        "12.04",
         "14.04",
         "16.04"
       ]
@@ -64,8 +70,7 @@
       "operatingsystem": "Solaris",
       "operatingsystemrelease": [
         "10",
-        "11",
-        "11.4"
+        "11"
       ]
     },
     {
@@ -103,7 +108,7 @@
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 4.10.0 < 6.0.0"
+      "version_requirement": ">= 3.8.7 < 5.0.0"
     }
   ],
   "description": "Manages compressed file staging and deployment."

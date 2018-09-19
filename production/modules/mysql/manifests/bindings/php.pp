@@ -1,8 +1,4 @@
-# @summary
-#   Private class for installing php language bindings
-#
-# @api private
-#
+# Private class: See README.md
 class mysql::bindings::php {
 
   package { 'php-mysql':

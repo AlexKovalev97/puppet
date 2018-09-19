@@ -1,26 +1,28 @@
+#! /usr/bin/env ruby -S rspec
 require 'spec_helper_acceptance'
 
-describe 'upcase function', :if => Puppet::Util::Package.versioncmp(return_puppet_version, '6.0.0') < 0 do
+describe 'upcase function' do
   describe 'success' do
-    pp1 = <<-DOC
+    it 'upcases arrays' do
+      pp = <<-EOS
       $a = ["wallless", "laparohysterosalpingooophorectomy", "brrr", "goddessship"]
       $o = upcase($a)
       notice(inline_template('upcase is <%= @o.inspect %>'))
-    DOC
-    it 'upcases arrays' do
-      apply_manifest(pp1, :catch_failures => true) do |r|
-        expect(r.stdout).to match(%r{upcase is \["WALLLESS", "LAPAROHYSTEROSALPINGOOOPHORECTOMY", "BRRR", "GODDESSSHIP"\]})
+      EOS
+
+      apply_manifest(pp, :catch_failures => true) do |r|
+        expect(r.stdout).to match(/upcase is \["WALLLESS", "LAPAROHYSTEROSALPINGOOOPHORECTOMY", "BRRR", "GODDESSSHIP"\]/)
       end
     end
-
-    pp2 = <<-DOC
+    it 'upcases strings' do
+      pp = <<-EOS
       $a = "wallless laparohysterosalpingooophorectomy brrr goddessship"
       $o = upcase($a)
       notice(inline_template('upcase is <%= @o.inspect %>'))
-    DOC
-    it 'upcases strings' do
-      apply_manifest(pp2, :catch_failures => true) do |r|
-        expect(r.stdout).to match(%r{upcase is "WALLLESS LAPAROHYSTEROSALPINGOOOPHORECTOMY BRRR GODDESSSHIP"})
+      EOS
+
+      apply_manifest(pp, :catch_failures => true) do |r|
+        expect(r.stdout).to match(/upcase is "WALLLESS LAPAROHYSTEROSALPINGOOOPHORECTOMY BRRR GODDESSSHIP"/)
       end
     end
   end

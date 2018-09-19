@@ -3,26 +3,25 @@ require 'spec_helper_acceptance'
 describe 'mysql::db define' do
   describe 'creating a database' do
     let(:pp) do
-      <<-MANIFEST
+      <<-EOS
         class { 'mysql::server': root_password => 'password' }
         mysql::db { 'spec1':
           user     => 'root1',
           password => 'password',
         }
-      MANIFEST
+      EOS
     end
-
-    it_behaves_like 'a idempotent resource'
+    it_behaves_like "a idempotent resource"
 
     describe command("mysql -e 'show databases;'") do
       its(:exit_status) { is_expected.to eq 0 }
-      its(:stdout) { is_expected.to match %r{^spec1$} }
+      its(:stdout) { is_expected.to match /^spec1$/ }
     end
   end
 
   describe 'creating a database with post-sql' do
     let(:pp) do
-      <<-MANIFEST
+      <<-EOS
         class { 'mysql::server': override_options => { 'root_password' => 'password' } }
         file { '/tmp/spec.sql':
           ensure  => file,
@@ -34,35 +33,33 @@ describe 'mysql::db define' do
           password => 'password',
           sql      => '/tmp/spec.sql',
         }
-      MANIFEST
+      EOS
     end
-
-    it_behaves_like 'a idempotent resource'
+    it_behaves_like "a idempotent resource"
 
     describe command("mysql -e 'show tables;' spec2") do
       its(:exit_status) { is_expected.to eq 0 }
-      its(:stdout) { is_expected.to match %r{^table1$} }
+      its(:stdout) { is_expected.to match /^table1$/ }
     end
   end
 
   describe 'creating a database with dbname parameter' do
-    let(:check_command) { ' | grep realdb' }
+    let(:check_command) { " | grep realdb" }
     let(:pp) do
-      <<-MANIFEST
+      <<-EOS
         class { 'mysql::server': override_options => { 'root_password' => 'password' } }
         mysql::db { 'spec1':
           user     => 'root1',
           password => 'password',
           dbname   => 'realdb',
         }
-      MANIFEST
+      EOS
     end
-
-    it_behaves_like 'a idempotent resource'
+    it_behaves_like "a idempotent resource"
 
     describe command("mysql -e 'show databases;'") do
       its(:exit_status) { is_expected.to eq 0 }
-      its(:stdout) { is_expected.to match %r{^realdb$} }
+      its(:stdout) { is_expected.to match /^realdb$/ }
     end
   end
 end

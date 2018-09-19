@@ -1,7 +1,4 @@
-# @summary
-#   "Provider" for mysqldump
-# @api private
-#
+# See README.me for usage.
 class mysql::backup::mysqldump (
   $backupuser         = '',
   $backuppassword     = '',
@@ -33,7 +30,7 @@ class mysql::backup::mysqldump (
 
   mysql_user { "${backupuser}@localhost":
     ensure        => $ensure,
-    password_hash => mysql::password($backuppassword),
+    password_hash => mysql_password($backuppassword),
     require       => Class['mysql::server::root_password'],
   }
 

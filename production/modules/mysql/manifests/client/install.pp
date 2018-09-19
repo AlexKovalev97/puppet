@@ -1,8 +1,4 @@
-# @summary
-#   Private class for MySQL client install.
-#
-# @api private
-#
+# See README.md.
 class mysql::client::install {
 
   if $mysql::client::package_manage {

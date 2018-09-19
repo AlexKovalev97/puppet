@@ -1,8 +1,4 @@
-# @summary
-#   Private class for installing java language bindings.
-#
-# @api private
-#
+# Private class
 class mysql::bindings::java {
 
   package { 'mysql-connector-java':

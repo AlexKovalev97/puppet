@@ -1,15 +1,14 @@
 #
 # reverse.rb
 #
+
 module Puppet::Parser::Functions
-  newfunction(:reverse, :type => :rvalue, :doc => <<-DOC
-    Reverses the order of a string or array.
+  newfunction(:reverse, :type => :rvalue, :doc => <<-EOS
+Reverses the order of a string or array.
+    EOS
+  ) do |arguments|
 
-    Note that the same can be done with the reverse_each() function in Puppet.
-    DOC
-             ) do |arguments|
-
-    raise(Puppet::ParseError, "reverse(): Wrong number of arguments given (#{arguments.size} for 1)") if arguments.empty?
+    raise(Puppet::ParseError, "reverse(): Wrong number of arguments given (#{arguments.size} for 1)") if arguments.size < 1
 
     value = arguments[0]
 

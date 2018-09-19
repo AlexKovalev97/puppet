@@ -1,15 +1,16 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'mysql'))
-Puppet::Type.type(:mysql_plugin).provide(:mysql, parent: Puppet::Provider::Mysql) do
+Puppet::Type.type(:mysql_plugin).provide(:mysql, :parent => Puppet::Provider::Mysql) do
   desc 'Manages MySQL plugins.'
 
-  commands mysql_raw: 'mysql'
+  commands :mysql => 'mysql'
 
   def self.instances
-    mysql_caller('show plugins', 'regular').split("\n").map do |line|
-      name, _status, _type, library, _license = line.split(%r{\t})
-      new(name: name,
-          ensure: :present,
-          soname: library)
+    mysql([defaults_file, '-NBe', 'show plugins'].compact).split("\n").collect do |line|
+      name, status, type, library, license = line.split(/\t/)
+      new(:name    => name,
+          :ensure  => :present,
+          :soname  => library
+         )
     end
   end
 
@@ -18,7 +19,7 @@ Puppet::Type.type(:mysql_plugin).provide(:mysql, parent: Puppet::Provider::Mysql
   def self.prefetch(resources)
     plugins = instances
     resources.keys.each do |plugin|
-      if provider = plugins.find { |pl| pl.name == plugin } # rubocop:disable Lint/AssignmentInCondition
+      if provider = plugins.find { |pl| pl.name == plugin }
         resources[plugin].provider = provider
       end
     end
@@ -27,17 +28,17 @@ Puppet::Type.type(:mysql_plugin).provide(:mysql, parent: Puppet::Provider::Mysql
   def create
     # Use plugin_name.so as soname if it's not specified. This won't work on windows as
     # there it should be plugin_name.dll
-    @resource[:soname].nil? ? (soname = @resource[:name] + '.so') : (soname = @resource[:soname])
-    self.class.mysql_caller("install plugin #{@resource[:name]} soname '#{soname}'", 'regular')
+    @resource[:soname].nil? ? (soname=@resource[:name] + '.so') : (soname=@resource[:soname])
+    mysql([defaults_file, '-NBe', "install plugin #{@resource[:name]} soname '#{soname}'"].compact)
 
-    @property_hash[:ensure] = :present
+    @property_hash[:ensure]  = :present
     @property_hash[:soname] = @resource[:soname]
 
     exists? ? (return true) : (return false)
   end
 
   def destroy
-    self.class.mysql_caller("uninstall plugin #{@resource[:name]}", 'regular')
+    mysql([defaults_file, '-NBe', "uninstall plugin #{@resource[:name]}"].compact)
 
     @property_hash.clear
     exists? ? (return false) : (return true)
@@ -48,4 +49,5 @@ Puppet::Type.type(:mysql_plugin).provide(:mysql, parent: Puppet::Provider::Mysql
   end
 
   mk_resource_methods
+
 end

@@ -1,26 +1,20 @@
 #
 # hash.rb
 #
+
 module Puppet::Parser::Functions
-  newfunction(:hash, :type => :rvalue, :doc => <<-DOC
-    This function converts an array into a hash.
+  newfunction(:hash, :type => :rvalue, :doc => <<-EOS
+This function converts an array into a hash.
 
-    *Examples:*
+*Examples:*
 
-        hash(['a',1,'b',2,'c',3])
+    hash(['a',1,'b',2,'c',3])
 
-    Would return: {'a'=>1,'b'=>2,'c'=>3}
+Would return: {'a'=>1,'b'=>2,'c'=>3}
+    EOS
+  ) do |arguments|
 
-    Note: Since Puppet 5.0.0 type conversions can in general be performed by using the Puppet Type System.
-    See the function new() in Puppet for a wide range of available type conversions.
-    This example shows the equivalent expression in the Puppet language:
-
-        Hash(['a',1,'b',2,'c',3])
-        Hash([['a',1],['b',2],['c',3]])
-    DOC
-             ) do |arguments|
-
-    raise(Puppet::ParseError, "hash(): Wrong number of arguments given (#{arguments.size} for 1)") if arguments.empty?
+    raise(Puppet::ParseError, "hash(): Wrong number of arguments given (#{arguments.size} for 1)") if arguments.size < 1
 
     array = arguments[0]
 

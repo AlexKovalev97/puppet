@@ -1,8 +1,10 @@
+#! /usr/bin/env ruby -S rspec
 require 'spec_helper_acceptance'
 
-describe 'chomp function', :if => Puppet::Util::Package.versioncmp(return_puppet_version, '6.0.0') < 0 do
+describe 'chomp function' do
   describe 'success' do
-    pp = <<-DOC
+    it 'should eat the newline' do
+      pp = <<-EOS
       $input = "test\n"
       if size($input) != 5 {
         fail("Size of ${input} is not 5.")
@@ -11,8 +13,8 @@ describe 'chomp function', :if => Puppet::Util::Package.versioncmp(return_puppet
       if size($output) != 4 {
         fail("Size of ${input} is not 4.")
       }
-    DOC
-    it 'eats the newline' do
+      EOS
+
       apply_manifest(pp, :catch_failures => true)
     end
   end
